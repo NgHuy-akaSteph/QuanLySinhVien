@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Quản Lý Sinh Viên</string>
+    <string name="anh_dai_dien">Ảnh đại diện</string>
+    <string name="chon_anh">Chọn ảnh</string>
+    <string name="ma_sv">Mã SV</string>
+    <string name="ho_ten">Họ tên</string>
+    <string name="nam_sinh">Năm sinh</string>
+    <string name="dia_chi">Địa chỉ</string>
+    <string name="lop">Lớp</string>
+    <string name="them">Thêm</string>
+    <string name="luu">Lưu</string>
+    <string name="huy">Hủy</string>
+    <string name="xoa">Xóa</string>
+    <string name="tim_theo_lop">Tìm theo lớp…</string>
+    <string name="thoat">Thoát</string>
+</resources>

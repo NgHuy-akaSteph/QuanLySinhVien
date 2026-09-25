@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- 1. Khu vực Form nhập liệu -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <ImageView
+                android:id="@+id/imgAvatar"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:scaleType="centerCrop"
+                android:background="#EEEEEE"
+                android:src="@android:drawable/ic_menu_gallery"
+                android:contentDescription="@string/anh_dai_dien" />
+
+            <Button
+                android:id="@+id/btnChonAnh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="@string/chon_anh" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/edtMaSV"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints=""
+            android:hint="@string/ma_sv"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/edtHoTen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints=""
+            android:hint="@string/ho_ten"
+            android:inputType="textPersonName" />
+
+        <EditText
+            android:id="@+id/edtNamSinh"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints=""
+            android:hint="@string/nam_sinh"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/edtDiaChi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints=""
+            android:hint="@string/dia_chi"
+            android:inputType="textPostalAddress" />
+
+        <EditText
+            android:id="@+id/edtLop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints=""
+            android:hint="@string/lop"
+            android:inputType="text"
+            android:layout_marginBottom="8dp" />
+
+        <!-- 2. Khu vực Điều khiển (CRUD) -->
+        <LinearLayout
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/btnThem"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/them" />
+
+            <Button
+                android:id="@+id/btnLuu"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/luu" />
+
+            <Button
+                android:id="@+id/btnHuy"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/huy" />
+
+            <Button
+                android:id="@+id/btnXoa"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/xoa" />
+        </LinearLayout>
+
+        <!-- 3. Khu vực Tìm kiếm & Thoát -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <SearchView
+                android:id="@+id/searchView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:queryHint="@string/tim_theo_lop"
+                android:iconifiedByDefault="false" />
+
+            <Button
+                android:id="@+id/btnThoat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/thoat" />
+        </LinearLayout>
+
+        <!-- 4. Khu vực Danh sách (xuống dưới cùng) -->
+        <ListView
+            android:id="@+id/lvSinhVien"
+            android:layout_width="match_parent"
+            android:layout_height="280dp"
+            android:divider="#DDDDDD"
+            android:dividerHeight="1dp" />
+
+    </LinearLayout>
+</ScrollView>

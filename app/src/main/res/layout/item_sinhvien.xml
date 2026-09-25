@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <!-- Dòng 1 (in đậm): [Mã SV] - [Họ tên] -->
+    <TextView
+        android:id="@+id/tvDong1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#000000" />
+
+    <!-- Dòng 2: Lớp: [Tên lớp] -->
+    <TextView
+        android:id="@+id/tvDong2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="#555555"
+        android:textSize="14sp" />
+
+</LinearLayout>

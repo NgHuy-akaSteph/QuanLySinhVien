@@ -64,14 +64,6 @@
                 android:text="Chưa có tài khoản? Đăng ký Giảng viên"
                 android:textColor="?attr/colorPrimary" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="Tài khoản mẫu:\n• Giảng viên: GV001 / 123456 (Lớp CNTT1)\n• Sinh viên: SV001 / SV001 (Lớp CNTT1)"
-                android:textColor="#666666"
-                android:textSize="13sp" />
-
         </LinearLayout>
 
         <!-- ================= PANEL 2: ĐĂNG KÝ GIẢNG VIÊN ================= -->

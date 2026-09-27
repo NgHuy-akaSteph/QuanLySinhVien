@@ -13,4 +13,10 @@
     <string name="xoa">Xóa</string>
     <string name="tim_theo_lop">Tìm theo lớp…</string>
     <string name="thoat">Thoát</string>
+    <string name="dang_nhap">Đăng nhập</string>
+    <string name="ten_dang_nhap">Tên đăng nhập (Mã GV)</string>
+    <string name="mat_khau">Mật khẩu</string>
+    <string name="dang_xuat">Đăng xuất</string>
+    <string name="loi_dang_nhap">Tài khoản hoặc mật khẩu không đúng!</string>
+    <string name="nhap_day_du">Vui lòng nhập đầy đủ thông tin!</string>
 </resources>

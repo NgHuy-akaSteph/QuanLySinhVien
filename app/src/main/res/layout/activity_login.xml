@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp">
+
+        <!-- ================= PANEL 1: ĐĂNG NHẬP ================= -->
+        <LinearLayout
+            android:id="@+id/panelLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dang_nhap"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="32dp" />
+
+            <EditText
+                android:id="@+id/edtMaGV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Mã số (GVxxx / SVxxx)"
+                android:inputType="text"
+                android:layout_marginBottom="16dp"
+                android:autofillHints="username" />
+
+            <EditText
+                android:id="@+id/edtMatKhau"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/mat_khau"
+                android:inputType="textPassword"
+                android:layout_marginBottom="24dp"
+                android:autofillHints="password" />
+
+            <Button
+                android:id="@+id/btnDangNhap"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/dang_nhap"
+                android:textSize="16sp"
+                android:padding="12dp" />
+
+            <Button
+                android:id="@+id/btnChuyenDangKy"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Chưa có tài khoản? Đăng ký Giảng viên"
+                android:textColor="?attr/colorPrimary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Tài khoản mẫu:\n• Giảng viên: GV001 / 123456 (Lớp CNTT1)\n• Sinh viên: SV001 / SV001 (Lớp CNTT1)"
+                android:textColor="#666666"
+                android:textSize="13sp" />
+
+        </LinearLayout>
+
+        <!-- ================= PANEL 2: ĐĂNG KÝ GIẢNG VIÊN ================= -->
+        <LinearLayout
+            android:id="@+id/panelRegister"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ĐĂNG KÝ GIẢNG VIÊN"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"
+                android:layout_marginBottom="24dp" />
+
+            <EditText
+                android:id="@+id/edtRegMaGV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Mã giảng viên (VD: GV003)"
+                android:inputType="text"
+                android:layout_marginBottom="12dp"
+                android:autofillHints="username" />
+
+            <EditText
+                android:id="@+id/edtRegMatKhau"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Mật khẩu"
+                android:inputType="textPassword"
+                android:layout_marginBottom="12dp"
+                android:autofillHints="password" />
+
+            <EditText
+                android:id="@+id/edtRegHoTen"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Họ và tên"
+                android:inputType="textPersonName"
+                android:layout_marginBottom="12dp"
+                android:autofillHints="name" />
+
+            <EditText
+                android:id="@+id/edtRegLopPhuTrach"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Lớp phụ trách (VD: CNTT1)"
+                android:inputType="text"
+                android:layout_marginBottom="24dp"
+                android:autofillHints="" />
+
+            <Button
+                android:id="@+id/btnThucHienDangKy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ĐĂNG KÝ"
+                android:textSize="16sp"
+                android:padding="12dp" />
+
+            <Button
+                android:id="@+id/btnChuyenDangNhap"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Đã có tài khoản? Đăng nhập"
+                android:textColor="?attr/colorPrimary" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

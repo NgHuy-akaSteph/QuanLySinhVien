@@ -1,4 +1,4 @@
-package com.example.qlsv;
+package com.example.qlsv.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,14 +7,11 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.example.qlsv.R;
+import com.example.qlsv.model.SinhVien;
+
 import java.util.List;
 
-/**
- * Custom BaseAdapter cho ListView, dùng layout item_sinhvien.xml.
- * Mỗi dòng chỉ hiển thị:
- *   Dòng 1 (in đậm): [Mã SV] - [Họ tên]
- *   Dòng 2: Lớp: [Tên lớp]
- */
 public class SinhVienAdapter extends BaseAdapter {
 
     private List<SinhVien> danhSach;

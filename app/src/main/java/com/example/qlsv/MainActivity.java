@@ -3,6 +3,7 @@ package com.example.qlsv;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,9 +13,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -24,21 +28,32 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 import com.example.qlsv.adapter.SinhVienAdapter;
-import com.example.qlsv.database.AppDatabase;
+import com.example.qlsv.api.ApiClient;
 import com.example.qlsv.model.SinhVien;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
     private ImageView imgAvatar;
-    private Button btnChonAnh, btnThem, btnLuu, btnHuy, btnXoa, btnThoat;
+    private Button btnChonAnh, btnThem, btnLuu, btnHuy, btnXoa;
+    private ImageButton btnThoat;
     private EditText edtMaSV, edtHoTen, edtNamSinh, edtDiaChi, edtLop;
+    private LinearLayout panelForm, panelProfile;
+    private ImageView imgAvatarSv;
+    private TextView tvMaSvProfile, tvHoTenProfile, tvNamSinhProfile, tvDiaChiProfile, tvLopProfile;
     private ListView lvSinhVien;
     private SearchView searchView;
 
-    private AppDatabase db;
     private SinhVienAdapter adapter;
 
     private String userRole = "";
@@ -56,8 +71,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        db = AppDatabase.getInstance(this);
 
         docDuLieuTuIntent();
         thietLapActionBar();
@@ -107,23 +120,54 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void thietLapGiaoDienSinhVien() {
-        SinhVien sv = db.sinhVienDao().getSinhVienByMaSV(userId);
+        // Ẩn form chỉnh sửa + tìm kiếm + danh sách, hiện panel hồ sơ chỉ xem
+        panelForm.setVisibility(View.GONE);
+        searchView.setVisibility(View.GONE);
+        lvSinhVien.setVisibility(View.GONE);
 
-        if (sv != null) {
-            hienThiLenForm(sv);
+        panelProfile.setVisibility(View.VISIBLE);
+
+        ApiClient.getApiService().getSinhVienById(userId).enqueue(new Callback<SinhVien>() {
+            @Override
+            public void onResponse(Call<SinhVien> call, Response<SinhVien> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    hienThiLenProfile(response.body());
+                } else {
+                    Toast.makeText(MainActivity.this, "Không tìm thấy thông tin sinh viên", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SinhVien> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Lỗi kết nối API: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void hienThiLenProfile(SinhVien sv) {
+        tvMaSvProfile.setText(sv.getMaSV() != null ? sv.getMaSV() : "—");
+        tvHoTenProfile.setText(sv.getHoTen() != null ? sv.getHoTen() : "—");
+        tvNamSinhProfile.setText(String.valueOf(sv.getNamSinh()));
+        tvDiaChiProfile.setText(sv.getDiaChi() != null ? sv.getDiaChi() : "—");
+        tvLopProfile.setText(sv.getLop() != null ? sv.getLop() : "—");
+
+        String anh = sv.getAnhURI();
+        if (!TextUtils.isEmpty(anh)) {
+            try {
+                Uri uri = Uri.parse(anh);
+                Bitmap bitmap = android.provider.MediaStore.Images.Media.getBitmap(
+                        getContentResolver(), uri);
+                RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(
+                        getResources(), bitmap);
+                rbd.setCornerRadius(16f);
+                rbd.setAntiAlias(true);
+                imgAvatarSv.setImageDrawable(rbd);
+            } catch (Exception e) {
+                imgAvatarSv.setImageResource(android.R.drawable.ic_menu_gallery);
+            }
+        } else {
+            imgAvatarSv.setImageResource(android.R.drawable.ic_menu_gallery);
         }
-
-        btnChonAnh.setEnabled(false);
-        edtMaSV.setEnabled(false);
-        edtHoTen.setEnabled(false);
-        edtNamSinh.setEnabled(false);
-        edtDiaChi.setEnabled(false);
-        edtLop.setEnabled(false);
-
-        btnThem.setVisibility(View.GONE);
-        btnLuu.setVisibility(View.GONE);
-        btnHuy.setVisibility(View.GONE);
-        btnXoa.setVisibility(View.GONE);
     }
 
     // ------------------ Khởi tạo ------------------
@@ -142,6 +186,15 @@ public class MainActivity extends AppCompatActivity {
         edtNamSinh = findViewById(R.id.edtNamSinh);
         edtDiaChi = findViewById(R.id.edtDiaChi);
         edtLop = findViewById(R.id.edtLop);
+
+        panelForm = findViewById(R.id.panelForm);
+        panelProfile = findViewById(R.id.panelProfile);
+        imgAvatarSv = findViewById(R.id.imgAvatarSv);
+        tvMaSvProfile = findViewById(R.id.tvMaSvProfile);
+        tvHoTenProfile = findViewById(R.id.tvHoTenProfile);
+        tvNamSinhProfile = findViewById(R.id.tvNamSinhProfile);
+        tvDiaChiProfile = findViewById(R.id.tvDiaChiProfile);
+        tvLopProfile = findViewById(R.id.tvLopProfile);
 
         lvSinhVien = findViewById(R.id.lvSinhVien);
         searchView = findViewById(R.id.searchView);
@@ -227,13 +280,32 @@ public class MainActivity extends AppCompatActivity {
     // ------------------ Nạp dữ liệu ------------------
 
     private void napDanhSachSinhVien() {
-        List<SinhVien> danhSach;
-        if (!TextUtils.isEmpty(lopPhuTrach)) {
-            danhSach = db.sinhVienDao().getSinhVienTheoLop(lopPhuTrach);
-        } else {
-            danhSach = db.sinhVienDao().getAllSinhVien();
-        }
-        loadDanhSachLenListView(danhSach);
+        ApiClient.getApiService().getAllSinhVien().enqueue(new Callback<List<SinhVien>>() {
+            @Override
+            public void onResponse(Call<List<SinhVien>> call, Response<List<SinhVien>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<SinhVien> all = response.body();
+                    List<SinhVien> result = new ArrayList<>();
+                    if (!TextUtils.isEmpty(lopPhuTrach)) {
+                        for (SinhVien sv : all) {
+                            if (sv.getLop() != null && sv.getLop().equalsIgnoreCase(lopPhuTrach)) {
+                                result.add(sv);
+                            }
+                        }
+                    } else {
+                        result.addAll(all);
+                    }
+                    loadDanhSachLenListView(result);
+                } else {
+                    Toast.makeText(MainActivity.this, "Không thể tải danh sách sinh viên từ API", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<SinhVien>> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Lỗi kết nối API: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void loadDanhSachLenListView(List<SinhVien> danhSach) {
@@ -246,18 +318,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void timKiemTheoLop(String tuKhoa) {
-        List<SinhVien> danhSach;
         if (TextUtils.isEmpty(tuKhoa)) {
             napDanhSachSinhVien();
             return;
         }
 
-        if (!TextUtils.isEmpty(lopPhuTrach)) {
-            danhSach = db.sinhVienDao().timTheoLopCuaGV(lopPhuTrach, tuKhoa);
-        } else {
-            danhSach = db.sinhVienDao().timTheoLop(tuKhoa);
-        }
-        loadDanhSachLenListView(danhSach);
+        ApiClient.getApiService().getAllSinhVien().enqueue(new Callback<List<SinhVien>>() {
+            @Override
+            public void onResponse(Call<List<SinhVien>> call, Response<List<SinhVien>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<SinhVien> all = response.body();
+                    List<SinhVien> result = new ArrayList<>();
+                    String keywordLower = tuKhoa.toLowerCase();
+                    for (SinhVien sv : all) {
+                        boolean matchLopPhuTrach = TextUtils.isEmpty(lopPhuTrach) ||
+                                (sv.getLop() != null && sv.getLop().equalsIgnoreCase(lopPhuTrach));
+                        if (!matchLopPhuTrach) continue;
+
+                        boolean matchLop = sv.getLop() != null && sv.getLop().toLowerCase().contains(keywordLower);
+                        boolean matchMaSV = sv.getMaSV() != null && sv.getMaSV().toLowerCase().contains(keywordLower);
+                        if (matchLop || matchMaSV) {
+                            result.add(sv);
+                        }
+                    }
+                    loadDanhSachLenListView(result);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<SinhVien>> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Lỗi tìm kiếm: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     // ------------------ Các chế độ của Form ------------------
@@ -351,26 +443,45 @@ public class MainActivity extends AppCompatActivity {
         }
 
         String anhURI = anhUriHienTai != null ? anhUriHienTai.toString() : "";
-        SinhVien sv = new SinhVien(maSV, hoTen, namSinh, diaChi, lop, anhURI, maSV);
+        SinhVien sv = new SinhVien(maSV, hoTen, namSinh, diaChi, lop, anhURI);
 
         if (sinhVienDangChon == null) {
-            long result = db.sinhVienDao().insertSinhVien(sv);
-            if (result == -1 || result == 0) {
-                Toast.makeText(this, "Mã SV \"" + maSV + "\" đã tồn tại", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            Toast.makeText(this, "Thêm sinh viên thành công", Toast.LENGTH_SHORT).show();
-        } else {
-            int rows = db.sinhVienDao().updateSinhVienByMaSV(maSV, hoTen, namSinh, diaChi, lop, anhURI);
-            if (rows <= 0) {
-                Toast.makeText(this, "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            Toast.makeText(this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
-        }
+            ApiClient.getApiService().createSinhVien(sv).enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(MainActivity.this, "Thêm sinh viên thành công", Toast.LENGTH_SHORT).show();
+                        napDanhSachSinhVien();
+                        chuyenSangCheDoThemMoi();
+                    } else {
+                        Toast.makeText(MainActivity.this, "Thêm thất bại hoặc mã SV đã tồn tại", Toast.LENGTH_SHORT).show();
+                    }
+                }
 
-        napDanhSachSinhVien();
-        chuyenSangCheDoThemMoi();
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Toast.makeText(MainActivity.this, "Lỗi kết nối API: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            ApiClient.getApiService().updateSinhVien(maSV, sv).enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(MainActivity.this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
+                        napDanhSachSinhVien();
+                        chuyenSangCheDoThemMoi();
+                    } else {
+                        Toast.makeText(MainActivity.this, "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Toast.makeText(MainActivity.this, "Lỗi kết nối API: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     // ------------------ Xóa ------------------
@@ -385,10 +496,23 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle("Xác nhận xóa")
                 .setMessage("Bạn có chắc chắn muốn xóa không?")
                 .setPositiveButton("Xóa", (dialog, which) -> {
-                    db.sinhVienDao().deleteSinhVien(sinhVienDangChon.getMaSV());
-                    Toast.makeText(this, "Đã xóa sinh viên", Toast.LENGTH_SHORT).show();
-                    napDanhSachSinhVien();
-                    chuyenSangCheDoThemMoi();
+                    ApiClient.getApiService().deleteSinhVien(sinhVienDangChon.getMaSV()).enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            if (response.isSuccessful()) {
+                                Toast.makeText(MainActivity.this, "Đã xóa sinh viên", Toast.LENGTH_SHORT).show();
+                                napDanhSachSinhVien();
+                                chuyenSangCheDoThemMoi();
+                            } else {
+                                Toast.makeText(MainActivity.this, "Xóa thất bại", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            Toast.makeText(MainActivity.this, "Lỗi kết nối API: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 })
                 .setNegativeButton("Hủy", null)
                 .show();

@@ -19,4 +19,5 @@
     <string name="dang_xuat">Đăng xuất</string>
     <string name="loi_dang_nhap">Tài khoản hoặc mật khẩu không đúng!</string>
     <string name="nhap_day_du">Vui lòng nhập đầy đủ thông tin!</string>
+    <string name="tim_theo_lop_ma_sv">Tìm theo lớp hoặc mã SV…</string>
 </resources>

@@ -1,15 +1,8 @@
 package com.example.qlsv.model;
 
-import androidx.room.Entity;
-import androidx.room.Index;
-import androidx.room.PrimaryKey;
-
-@Entity(tableName = "tb_giaovien", indices = {@Index(value = {"maGV"}, unique = true)})
 public class GiaoVien {
 
-    @PrimaryKey(autoGenerate = true)
     private long id;
-
     private String maGV;
     private String matKhau;
     private String hoTen;

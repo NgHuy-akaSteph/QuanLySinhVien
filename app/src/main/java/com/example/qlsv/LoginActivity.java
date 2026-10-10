@@ -11,9 +11,14 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.qlsv.database.AppDatabase;
+import com.example.qlsv.api.ApiClient;
 import com.example.qlsv.model.GiaoVien;
 import com.example.qlsv.model.SinhVien;
+import com.example.qlsv.repository.TeacherManager;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -29,14 +34,14 @@ public class LoginActivity extends AppCompatActivity {
     private EditText edtMaGV, edtMatKhau;
     private EditText edtRegMaGV, edtRegMatKhau, edtRegHoTen, edtRegLopPhuTrach;
 
-    private AppDatabase db;
+    private TeacherManager teacherManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        db = AppDatabase.getInstance(this);
+        teacherManager = TeacherManager.getInstance(this);
 
         anhXaView();
         ganSuKien();
@@ -89,9 +94,9 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         GiaoVien gvMoi = new GiaoVien(maGV, matKhau, hoTen, lopPhuTrach);
-        long result = db.giaoVienDao().insertGiaoVien(gvMoi);
+        boolean success = teacherManager.registerTeacher(gvMoi);
 
-        if (result != -1) {
+        if (success) {
             Toast.makeText(this, "Đăng ký Giảng viên thành công! Vui lòng đăng nhập.", Toast.LENGTH_SHORT).show();
             edtRegMaGV.setText("");
             edtRegMatKhau.setText("");
@@ -117,15 +122,29 @@ public class LoginActivity extends AppCompatActivity {
         String usernameUpper = username.toUpperCase();
 
         if (usernameUpper.startsWith("SV")) {
-            SinhVien sv = db.sinhVienDao().getSinhVienByMaSV(usernameUpper);
-            if (sv != null && (matKhau.equalsIgnoreCase(sv.getMaSV()) || matKhau.equals(sv.getMatKhau()))) {
-                Toast.makeText(this, "Xin chào Sinh viên " + sv.getHoTen(), Toast.LENGTH_SHORT).show();
-                chuyenSangMainActivity(ROLE_STUDENT, sv.getMaSV(), sv.getHoTen(), sv.getLop());
-            } else {
-                Toast.makeText(this, "Mã sinh viên hoặc mật khẩu không đúng!", Toast.LENGTH_SHORT).show();
-            }
+            ApiClient.getApiService().getSinhVienById(usernameUpper).enqueue(new Callback<SinhVien>() {
+                @Override
+                public void onResponse(Call<SinhVien> call, Response<SinhVien> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        SinhVien sv = response.body();
+                        if (matKhau.equalsIgnoreCase(sv.getMaSV())) {
+                            Toast.makeText(LoginActivity.this, "Xin chào Sinh viên " + sv.getHoTen(), Toast.LENGTH_SHORT).show();
+                            chuyenSangMainActivity(ROLE_STUDENT, sv.getMaSV(), sv.getHoTen(), sv.getLop());
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Mật khẩu không đúng!", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Không tìm thấy mã sinh viên " + usernameUpper, Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<SinhVien> call, Throwable t) {
+                    Toast.makeText(LoginActivity.this, "Lỗi kết nối API: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
         } else {
-            GiaoVien gv = db.giaoVienDao().login(usernameUpper, matKhau);
+            GiaoVien gv = teacherManager.login(usernameUpper, matKhau);
             if (gv != null) {
                 Toast.makeText(this, "Xin chào " + gv.getHoTen(), Toast.LENGTH_SHORT).show();
                 chuyenSangMainActivity(ROLE_TEACHER, gv.getMaGV(), gv.getHoTen(), gv.getLopPhuTrach());

@@ -72,21 +72,12 @@
                     android:layout_marginBottom="12dp" />
 
                 <EditText
-                    android:id="@+id/edtNamSinh"
+                    android:id="@+id/edtNgaySinh"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:autofillHints=""
-                    android:hint="@string/nam_sinh"
-                    android:inputType="number"
-                    android:layout_marginBottom="12dp" />
-
-                <EditText
-                    android:id="@+id/edtDiaChi"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:autofillHints=""
-                    android:hint="@string/dia_chi"
-                    android:inputType="textPostalAddress"
+                    android:hint="@string/ngay_sinh"
+                    android:inputType="text"
                     android:layout_marginBottom="12dp" />
 
                 <EditText
@@ -96,6 +87,24 @@
                     android:autofillHints=""
                     android:hint="@string/lop"
                     android:inputType="text"
+                    android:layout_marginBottom="12dp" />
+
+                <EditText
+                    android:id="@+id/edtDienThoai"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints=""
+                    android:hint="@string/dien_thoai"
+                    android:inputType="phone"
+                    android:layout_marginBottom="12dp" />
+
+                <EditText
+                    android:id="@+id/edtEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints=""
+                    android:hint="@string/email"
+                    android:inputType="textEmailAddress"
                     android:layout_marginBottom="12dp" />
 
                 <!-- 2. Khu vực Điều khiển (4 nút: Thêm / Lưu / Hủy / Xoá) -->
@@ -204,31 +213,13 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/nam_sinh"
+                    android:text="@string/ngay_sinh"
                     android:textStyle="bold"
                     android:textSize="13sp"
                     android:textColor="@color/field_label"
                     android:layout_marginBottom="4dp" />
                 <TextView
-                    android:id="@+id/tvNamSinhProfile"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="17sp"
-                    android:textColor="@color/black"
-                    android:background="@drawable/bg_info_field"
-                    android:layout_marginBottom="14dp"
-                    tools:ignore="HardcodedText" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/dia_chi"
-                    android:textStyle="bold"
-                    android:textSize="13sp"
-                    android:textColor="@color/field_label"
-                    android:layout_marginBottom="4dp" />
-                <TextView
-                    android:id="@+id/tvDiaChiProfile"
+                    android:id="@+id/tvNgaySinhProfile"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="17sp"
@@ -247,6 +238,42 @@
                     android:layout_marginBottom="4dp" />
                 <TextView
                     android:id="@+id/tvLopProfile"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="17sp"
+                    android:textColor="@color/black"
+                    android:background="@drawable/bg_info_field"
+                    android:layout_marginBottom="14dp"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dien_thoai"
+                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:textColor="@color/field_label"
+                    android:layout_marginBottom="4dp" />
+                <TextView
+                    android:id="@+id/tvDienThoaiProfile"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="17sp"
+                    android:textColor="@color/black"
+                    android:background="@drawable/bg_info_field"
+                    android:layout_marginBottom="14dp"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/email"
+                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:textColor="@color/field_label"
+                    android:layout_marginBottom="4dp" />
+                <TextView
+                    android:id="@+id/tvEmailProfile"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="17sp"

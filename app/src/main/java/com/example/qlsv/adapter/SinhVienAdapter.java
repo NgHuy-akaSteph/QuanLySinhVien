@@ -29,7 +29,7 @@ public class SinhVienAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return danhSach.size();
+        return danhSach != null ? danhSach.size() : 0;
     }
 
     @Override
@@ -61,8 +61,11 @@ public class SinhVienAdapter extends BaseAdapter {
         }
 
         SinhVien sv = danhSach.get(position);
-        holder.tvDong1.setText(String.format("%s - %s", sv.getMaSV(), sv.getHoTen()));
-        holder.tvDong2.setText(String.format("Lớp: %s", sv.getLop()));
+        holder.tvDong1.setText(String.format("%s - %s",
+                sv.getMaSV() != null ? sv.getMaSV() : "",
+                sv.getHoTen() != null ? sv.getHoTen() : ""));
+        holder.tvDong2.setText(String.format("Lớp: %s",
+                sv.getLop() != null ? sv.getLop() : ""));
 
         return convertView;
     }

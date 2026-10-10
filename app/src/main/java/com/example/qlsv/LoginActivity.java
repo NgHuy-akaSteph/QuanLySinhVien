@@ -12,9 +12,10 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.qlsv.api.ApiClient;
-import com.example.qlsv.model.GiaoVien;
-import com.example.qlsv.model.SinhVien;
-import com.example.qlsv.repository.TeacherManager;
+import com.example.qlsv.api.ApiService;
+import com.example.qlsv.model.LoginRequest;
+import com.example.qlsv.model.LoginResponse;
+import com.example.qlsv.repository.SessionManager;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,21 +28,35 @@ public class LoginActivity extends AppCompatActivity {
     public static final String EXTRA_HO_TEN = "EXTRA_HO_TEN";
     public static final String EXTRA_LOP = "EXTRA_LOP";
 
+    // Giữ hằng số ROLE_ để tương thích ngược với MainActivity
     public static final String ROLE_STUDENT = "STUDENT";
     public static final String ROLE_TEACHER = "TEACHER";
+    public static final String ROLE_ADMIN = "ADMIN";
 
-    private LinearLayout panelLogin, panelRegister;
+    private LinearLayout panelLogin;
     private EditText edtMaGV, edtMatKhau;
-    private EditText edtRegMaGV, edtRegMatKhau, edtRegHoTen, edtRegLopPhuTrach;
 
-    private TeacherManager teacherManager;
+    private SessionManager session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        teacherManager = TeacherManager.getInstance(this);
+        // Khởi tạo ApiClient (cần cho AuthInterceptor)
+        ApiClient.init(getApplicationContext());
+        session = ApiClient.getSessionManager();
+
+        // Nếu đã có session hợp lệ -> vào thẳng MainActivity
+        if (session != null && session.isLoggedIn()) {
+            chuyenSangMainActivity(
+                    session.getVaiTro(),
+                    session.getMaLienQuan(),
+                    session.getHoTen(),
+                    session.getLop()
+            );
+            return;
+        }
 
         anhXaView();
         ganSuKien();
@@ -49,15 +64,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private void anhXaView() {
         panelLogin = findViewById(R.id.panelLogin);
-        panelRegister = findViewById(R.id.panelRegister);
-
         edtMaGV = findViewById(R.id.edtMaGV);
         edtMatKhau = findViewById(R.id.edtMatKhau);
-
-        edtRegMaGV = findViewById(R.id.edtRegMaGV);
-        edtRegMatKhau = findViewById(R.id.edtRegMatKhau);
-        edtRegHoTen = findViewById(R.id.edtRegHoTen);
-        edtRegLopPhuTrach = findViewById(R.id.edtRegLopPhuTrach);
     }
 
     private void ganSuKien() {
@@ -68,20 +76,93 @@ public class LoginActivity extends AppCompatActivity {
 
         btnDangNhap.setOnClickListener(v -> xuLyDangNhap());
 
+        // Panel đăng ký GV vẫn giữ (lưu SharedPreferences) - admin sẽ cấp tài khoản thật qua API
         btnChuyenDangKy.setOnClickListener(v -> {
             panelLogin.setVisibility(View.GONE);
-            panelRegister.setVisibility(View.VISIBLE);
+            LinearLayout panelRegister = findViewById(R.id.panelRegister);
+            if (panelRegister != null) panelRegister.setVisibility(View.VISIBLE);
         });
+        if (btnChuyenDangNhap != null) {
+            btnChuyenDangNhap.setOnClickListener(v -> {
+                LinearLayout panelRegister = findViewById(R.id.panelRegister);
+                if (panelRegister != null) panelRegister.setVisibility(View.GONE);
+                panelLogin.setVisibility(View.VISIBLE);
+            });
+        }
+        if (btnThucHienDangKy != null) {
+            btnThucHienDangKy.setOnClickListener(v -> xuLyDangKyGiangVien());
+        }
+    }
 
-        btnChuyenDangNhap.setOnClickListener(v -> {
-            panelRegister.setVisibility(View.GONE);
-            panelLogin.setVisibility(View.VISIBLE);
+    private void xuLyDangNhap() {
+        String userName = edtMaGV.getText().toString().trim();
+        String matKhau = edtMatKhau.getText().toString().trim();
+
+        if (TextUtils.isEmpty(userName) || TextUtils.isEmpty(matKhau)) {
+            Toast.makeText(this, getString(R.string.nhap_day_du), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ApiService api = ApiClient.getApiService();
+        api.login(new LoginRequest(userName, matKhau)).enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    LoginResponse res = response.body();
+
+                    String vaiTro = res.getVaiTro();
+                    String maLienQuan = res.getMaLienQuan();
+                    if (maLienQuan == null || maLienQuan.isEmpty()) {
+                        maLienQuan = userName; // fallback dùng userName
+                    }
+                    String hoTen = res.getHoTen();
+                    if (hoTen == null || hoTen.isEmpty()) {
+                        hoTen = userName;
+                    }
+                    String lop = res.getLop();
+                    if (lop == null) lop = "";
+
+                    // Lưu session
+                    if (session != null) {
+                        session.saveSession(res.getToken(), userName, vaiTro, maLienQuan, hoTen, lop);
+                    }
+
+                    // Map vaiTro -> role MainActivity hiểu
+                    String roleForMain = mapVaiTroToRole(vaiTro);
+
+                    Toast.makeText(LoginActivity.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
+                    chuyenSangMainActivity(roleForMain, maLienQuan, hoTen, lop);
+                } else {
+                    String msg = response.code() == 401
+                            ? "Tài khoản hoặc mật khẩu không đúng!"
+                            : "Đăng nhập thất bại (code " + response.code() + ")";
+                    Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                Toast.makeText(LoginActivity.this,
+                        "Lỗi kết nối API: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
+    }
 
-        btnThucHienDangKy.setOnClickListener(v -> xuLyDangKyGiangVien());
+    private String mapVaiTroToRole(String vaiTro) {
+        if (vaiTro == null) return ROLE_STUDENT;
+        String v = vaiTro.toUpperCase();
+        if (v.contains("ADMIN")) return ROLE_ADMIN;
+        if (v.contains("TEACHER") || v.contains("GV") || v.contains("GIANG")) return ROLE_TEACHER;
+        return ROLE_STUDENT;
     }
 
     private void xuLyDangKyGiangVien() {
+        // Giữ logic cũ: đăng ký GV vào SharedPreferences - chờ admin cấp tài khoản API.
+        EditText edtRegMaGV = findViewById(R.id.edtRegMaGV);
+        EditText edtRegMatKhau = findViewById(R.id.edtRegMatKhau);
+        EditText edtRegHoTen = findViewById(R.id.edtRegHoTen);
+        EditText edtRegLopPhuTrach = findViewById(R.id.edtRegLopPhuTrach);
+
         String maGV = edtRegMaGV.getText().toString().trim().toUpperCase();
         String matKhau = edtRegMatKhau.getText().toString().trim();
         String hoTen = edtRegHoTen.getText().toString().trim();
@@ -93,64 +174,26 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        GiaoVien gvMoi = new GiaoVien(maGV, matKhau, hoTen, lopPhuTrach);
-        boolean success = teacherManager.registerTeacher(gvMoi);
+        // Lưu vào SharedPreferences để dùng tạm khi admin chưa cấp tài khoản.
+        // Ở phiên bản này vẫn dùng TeacherManager cũ để tương thích ngược.
+        com.example.qlsv.repository.TeacherManager tm =
+                com.example.qlsv.repository.TeacherManager.getInstance(this);
+        com.example.qlsv.model.GiaoVien gvMoi =
+                new com.example.qlsv.model.GiaoVien(maGV, hoTen, "", "", "", "");
+        boolean success = tm.registerTeacherCompat(gvMoi, matKhau, lopPhuTrach);
 
         if (success) {
-            Toast.makeText(this, "Đăng ký Giảng viên thành công! Vui lòng đăng nhập.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Đăng ký tạm thành công. Chờ admin cấp tài khoản API!", Toast.LENGTH_SHORT).show();
             edtRegMaGV.setText("");
             edtRegMatKhau.setText("");
             edtRegHoTen.setText("");
             edtRegLopPhuTrach.setText("");
 
-            panelRegister.setVisibility(View.GONE);
+            LinearLayout panelRegister = findViewById(R.id.panelRegister);
+            if (panelRegister != null) panelRegister.setVisibility(View.GONE);
             panelLogin.setVisibility(View.VISIBLE);
         } else {
             Toast.makeText(this, "Mã giảng viên \"" + maGV + "\" đã tồn tại!", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void xuLyDangNhap() {
-        String username = edtMaGV.getText().toString().trim();
-        String matKhau = edtMatKhau.getText().toString().trim();
-
-        if (TextUtils.isEmpty(username) || TextUtils.isEmpty(matKhau)) {
-            Toast.makeText(this, getString(R.string.nhap_day_du), Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String usernameUpper = username.toUpperCase();
-
-        if (usernameUpper.startsWith("SV")) {
-            ApiClient.getApiService().getSinhVienById(usernameUpper).enqueue(new Callback<SinhVien>() {
-                @Override
-                public void onResponse(Call<SinhVien> call, Response<SinhVien> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        SinhVien sv = response.body();
-                        if (matKhau.equalsIgnoreCase(sv.getMaSV())) {
-                            Toast.makeText(LoginActivity.this, "Xin chào Sinh viên " + sv.getHoTen(), Toast.LENGTH_SHORT).show();
-                            chuyenSangMainActivity(ROLE_STUDENT, sv.getMaSV(), sv.getHoTen(), sv.getLop());
-                        } else {
-                            Toast.makeText(LoginActivity.this, "Mật khẩu không đúng!", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        Toast.makeText(LoginActivity.this, "Không tìm thấy mã sinh viên " + usernameUpper, Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<SinhVien> call, Throwable t) {
-                    Toast.makeText(LoginActivity.this, "Lỗi kết nối API: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            GiaoVien gv = teacherManager.login(usernameUpper, matKhau);
-            if (gv != null) {
-                Toast.makeText(this, "Xin chào " + gv.getHoTen(), Toast.LENGTH_SHORT).show();
-                chuyenSangMainActivity(ROLE_TEACHER, gv.getMaGV(), gv.getHoTen(), gv.getLopPhuTrach());
-            } else {
-                Toast.makeText(this, getString(R.string.loi_dang_nhap), Toast.LENGTH_SHORT).show();
-            }
         }
     }
 

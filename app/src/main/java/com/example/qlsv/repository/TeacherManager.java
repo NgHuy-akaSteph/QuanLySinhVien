@@ -11,6 +11,11 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Quản lý tài khoản GV cục bộ (SharedPreferences) - dùng làm fallback
+ * khi admin chưa cấp tài khoản API. Lưu thêm matKhau và lopPhuTrach
+ * vì GiaoVien model mới đã bỏ 2 trường này.
+ */
 public class TeacherManager {
 
     private static final String PREF_NAME = "teacher_prefs";
@@ -19,6 +24,27 @@ public class TeacherManager {
     private static TeacherManager instance;
     private final SharedPreferences prefs;
     private final Gson gson;
+
+    /** DTO nội bộ để lưu thêm matKhau, lopPhuTrach (không có trong API GiaoVienDto). */
+    public static class GiaoVienLocal {
+        public String maGV;
+        public String matKhau;
+        public String hoTen;
+        public String lopPhuTrach;
+        public String hocHam;
+        public String hocVi;
+        public String email;
+        public String dienThoai;
+
+        public GiaoVienLocal() {}
+
+        public GiaoVienLocal(String maGV, String matKhau, String hoTen, String lopPhuTrach) {
+            this.maGV = maGV;
+            this.matKhau = matKhau;
+            this.hoTen = hoTen;
+            this.lopPhuTrach = lopPhuTrach;
+        }
+    }
 
     private TeacherManager(Context context) {
         prefs = context.getApplicationContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
@@ -34,58 +60,54 @@ public class TeacherManager {
     }
 
     private void initDefaultTeachers() {
-        // Đảm bảo luôn có 1 GV mặc định GV01/GV01 cho lần đầu dùng app.
-        // Nếu user đã có data cũ (GV001/...) thì vẫn giữ nguyên, chỉ thêm GV01 nếu thiếu.
-        List<GiaoVien> teachers = getAllTeachers();
+        List<GiaoVienLocal> teachers = getAllLocal();
         boolean hasDefault = false;
-        for (GiaoVien gv : teachers) {
-            if ("GV01".equalsIgnoreCase(gv.getMaGV())) {
+        for (GiaoVienLocal gv : teachers) {
+            if ("GV01".equalsIgnoreCase(gv.maGV)) {
                 hasDefault = true;
                 break;
             }
         }
         if (!hasDefault) {
-            teachers.add(new GiaoVien("GV01", "GV01", "Giáo viên mặc định", ""));
-            saveAllTeachers(teachers);
+            teachers.add(new GiaoVienLocal("GV01", "GV01", "Giáo viên mặc định", ""));
+            saveAllLocal(teachers);
         }
     }
 
-    public List<GiaoVien> getAllTeachers() {
+    private List<GiaoVienLocal> getAllLocal() {
         String json = prefs.getString(KEY_TEACHERS, null);
-        if (json == null) {
-            return new ArrayList<>();
-        }
-        Type type = new TypeToken<List<GiaoVien>>() {}.getType();
-        List<GiaoVien> list = gson.fromJson(json, type);
+        if (json == null) return new ArrayList<>();
+        Type type = new TypeToken<List<GiaoVienLocal>>() {}.getType();
+        List<GiaoVienLocal> list = gson.fromJson(json, type);
         return list != null ? list : new ArrayList<>();
     }
 
-    private void saveAllTeachers(List<GiaoVien> teachers) {
-        String json = gson.toJson(teachers);
+    private void saveAllLocal(List<GiaoVienLocal> list) {
+        String json = gson.toJson(list);
         prefs.edit().putString(KEY_TEACHERS, json).apply();
     }
 
-    public GiaoVien login(String maGV, String matKhau) {
+    /** Login với tài khoản local. */
+    public GiaoVienLocal login(String maGV, String matKhau) {
         if (maGV == null || matKhau == null) return null;
-        List<GiaoVien> teachers = getAllTeachers();
-        for (GiaoVien gv : teachers) {
-            if (maGV.equalsIgnoreCase(gv.getMaGV()) && matKhau.equalsIgnoreCase(gv.getMatKhau())) {
+        for (GiaoVienLocal gv : getAllLocal()) {
+            if (maGV.equalsIgnoreCase(gv.maGV) && matKhau.equalsIgnoreCase(gv.matKhau)) {
                 return gv;
             }
         }
         return null;
     }
 
-    public boolean registerTeacher(GiaoVien newGv) {
-        if (newGv == null || newGv.getMaGV() == null) return false;
-        List<GiaoVien> teachers = getAllTeachers();
-        for (GiaoVien gv : teachers) {
-            if (newGv.getMaGV().equalsIgnoreCase(gv.getMaGV())) {
-                return false; // Already exists
-            }
+    /** Đăng ký GV từ form - wrapper tương thích. */
+    public boolean registerTeacherCompat(GiaoVien gv, String matKhau, String lopPhuTrach) {
+        if (gv == null || gv.getMaGV() == null) return false;
+        List<GiaoVienLocal> list = getAllLocal();
+        for (GiaoVienLocal existing : list) {
+            if (existing.maGV.equalsIgnoreCase(gv.getMaGV())) return false;
         }
-        teachers.add(newGv);
-        saveAllTeachers(teachers);
+        list.add(new GiaoVienLocal(
+                gv.getMaGV(), matKhau, gv.getHoTen(), lopPhuTrach));
+        saveAllLocal(list);
         return true;
     }
 }

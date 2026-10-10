@@ -3,6 +3,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_quan_ly_gv"
+        android:title="@string/quan_ly_gv"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_quan_ly_lop"
+        android:title="@string/quan_ly_lop"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_quan_ly_tai_khoan"
+        android:title="@string/quan_ly_tai_khoan"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_doi_mat_khau"
+        android:title="@string/doi_mat_khau"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_dang_xuat"
         android:title="@string/dang_xuat"
         app:showAsAction="never" />
@@ -10,6 +30,6 @@
     <item
         android:id="@+id/action_thoat"
         android:title="@string/thoat"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
 
 </menu>

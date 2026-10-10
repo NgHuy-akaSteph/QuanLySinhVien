@@ -16,6 +16,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.QuanLySinhVien">
 
         <activity
@@ -31,6 +32,22 @@
             android:name=".MainActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".TeacherManagementActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ClassManagementActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AccountManagementActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ChangePasswordActivity"
+            android:exported="false" />
 
     </application>
 

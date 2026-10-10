@@ -4,9 +4,11 @@
     <string name="chon_anh">Chọn ảnh</string>
     <string name="ma_sv">Mã SV</string>
     <string name="ho_ten">Họ tên</string>
-    <string name="nam_sinh">Năm sinh</string>
+    <string name="ngay_sinh">Ngày sinh (yyyy-MM-dd)</string>
     <string name="dia_chi">Địa chỉ</string>
     <string name="lop">Lớp</string>
+    <string name="dien_thoai">Điện thoại</string>
+    <string name="email">Email</string>
     <string name="them">Thêm</string>
     <string name="luu">Lưu</string>
     <string name="huy">Hủy</string>
@@ -14,10 +16,15 @@
     <string name="tim_theo_lop">Tìm theo lớp…</string>
     <string name="thoat">Thoát</string>
     <string name="dang_nhap">Đăng nhập</string>
-    <string name="ten_dang_nhap">Tên đăng nhập (Mã GV)</string>
+    <string name="ten_dang_nhap">Tên đăng nhập</string>
     <string name="mat_khau">Mật khẩu</string>
     <string name="dang_xuat">Đăng xuất</string>
     <string name="loi_dang_nhap">Tài khoản hoặc mật khẩu không đúng!</string>
     <string name="nhap_day_du">Vui lòng nhập đầy đủ thông tin!</string>
     <string name="tim_theo_lop_ma_sv">Tìm theo lớp hoặc mã SV…</string>
+    <string name="quan_ly_gv">Quản lý Giáo viên</string>
+    <string name="quan_ly_lop">Quản lý Lớp</string>
+    <string name="quan_ly_tai_khoan">Quản lý Tài khoản</string>
+    <string name="doi_mat_khau">Đổi mật khẩu</string>
+    <string name="dang_dang_xuat">Đang đăng xuất…</string>
 </resources>
